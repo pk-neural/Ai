@@ -1,0 +1,12 @@
+node_modules/
+.venv/
+__pycache__/
+.ipynb_checkpoints/
+.env
+*.h5
+*.pt
+*.pth
+*.onnx
+data/
+datasets/
+
