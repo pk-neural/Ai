@@ -2110,16 +2110,16 @@ function getEndpoint(category) {
     loadingContainer.classList.remove('active');
     resultContainer.classList.add('active');
 
-    // Get prediction and confidence from backend response
-    const prediction = (data.prediction || '').toLowerCase().trim();
-    const confidence = parseFloat(data.confidence) || 0;
+    const rawPrediction = (data.prediction || '').toString().toLowerCase().trim();
+    const rawConfidence = data.confidence;
+    const confidenceNum = Number(rawConfidence);
+    const confidenceValid = Number.isFinite(confidenceNum) ? confidenceNum : 0;
+    const confidenceForBar = Math.max(0, Math.min(100, confidenceValid));
+    const confidenceDisplay = Number.isFinite(confidenceNum) ? `${rawConfidence}%` : '0%';
 
-    // Determine if prediction is fake or real
-    // Handle all variations: "fake", "fake spoiled", "fake rotton", "real", "real spoiled", "real rotton", "authentic"
-    const isFake = prediction.startsWith('fake');
-    const isReal = prediction.startsWith('real') || prediction === 'authentic';
+    const isFake = rawPrediction.startsWith('fake');
+    const isReal = rawPrediction.startsWith('real') || rawPrediction === 'authentic';
 
-    // Set badge and styling based on prediction
     if (isFake) {
         resultBadge.textContent = 'FAKE';
         resultBadge.className = 'result-badge fake-badge';
@@ -2133,7 +2133,6 @@ function getEndpoint(category) {
         resultConfidence.className = 'result-confidence-large real';
         if (confidenceValue) confidenceValue.style.color = 'var(--success)';
     } else {
-        // Fallback: default to real if unclear
         resultBadge.textContent = 'REAL';
         resultBadge.className = 'result-badge real-badge';
         confidenceFill.className = 'confidence-fill real';
@@ -2141,21 +2140,17 @@ function getEndpoint(category) {
         if (confidenceValue) confidenceValue.style.color = 'var(--success)';
     }
 
-    // Format prediction string for display (capitalize first letter of each word)
-    const formattedPrediction = data.prediction
+    const formattedPrediction = (data.prediction || '')
         .split(' ')
         .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
         .join(' ');
 
-    // Display confidence (use backend value exactly, format to 2 decimals if needed)
-    const formattedConfidence = confidence.toFixed(2);
-    resultConfidence.textContent = formattedConfidence + '%';
-    confidenceValue.textContent = formattedConfidence + '%';
-    confidenceFill.style.width = formattedConfidence + '%';
+    resultConfidence.textContent = confidenceDisplay;
+    confidenceValue.textContent = confidenceDisplay;
+    confidenceFill.style.width = confidenceForBar + '%';
 
-    // Update result details with formatted prediction
     resultDetails.textContent =
-        `Model Prediction: ${formattedPrediction}\nConfidence: ${formattedConfidence}%`;
+        `Model Prediction: ${formattedPrediction}\nConfidence: ${confidenceDisplay}`;
 }
 
             
