@@ -503,6 +503,14 @@
             position: relative;
         }
 
+        .confidence-fill.fake {
+            background: linear-gradient(to right, #FF6584, #FF4757);
+        }
+
+        .confidence-fill.real {
+            background: linear-gradient(to right, #4CAF50, #2ECC71);
+        }
+
         .confidence-fill::after {
             content: '';
             position: absolute;
@@ -528,6 +536,14 @@
             font-size: 1.8rem;
             font-weight: 700;
             color: var(--primary);
+        }
+
+        .confidence-value.fake {
+            color: var(--secondary);
+        }
+
+        .confidence-value.real {
+            color: var(--success);
         }
 
         /* Modal */
@@ -844,6 +860,20 @@
             text-align: center;
             margin: 2rem 0;
             background: linear-gradient(to right, var(--primary), var(--accent));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .result-confidence-large.fake {
+            background: linear-gradient(to right, #FF6584, #FF4757);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .result-confidence-large.real {
+            background: linear-gradient(to right, #4CAF50, #2ECC71);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
@@ -2080,28 +2110,52 @@ function getEndpoint(category) {
     loadingContainer.classList.remove('active');
     resultContainer.classList.add('active');
 
-    const prediction = data.prediction.toLowerCase();
-    const confidence = Math.round(data.confidence);
+    // Get prediction and confidence from backend response
+    const prediction = (data.prediction || '').toLowerCase().trim();
+    const confidence = parseFloat(data.confidence) || 0;
 
-    const isFake =
-        prediction.includes("fake") ||
-        prediction.includes("ai");
+    // Determine if prediction is fake or real
+    // Handle all variations: "fake", "fake spoiled", "fake rotton", "real", "real spoiled", "real rotton", "authentic"
+    const isFake = prediction.startsWith('fake');
+    const isReal = prediction.startsWith('real') || prediction === 'authentic';
 
+    // Set badge and styling based on prediction
     if (isFake) {
         resultBadge.textContent = 'FAKE';
         resultBadge.className = 'result-badge fake-badge';
-    } else {
+        confidenceFill.className = 'confidence-fill fake';
+        resultConfidence.className = 'result-confidence-large fake';
+        if (confidenceValue) confidenceValue.style.color = 'var(--secondary)';
+    } else if (isReal) {
         resultBadge.textContent = 'REAL';
         resultBadge.className = 'result-badge real-badge';
+        confidenceFill.className = 'confidence-fill real';
+        resultConfidence.className = 'result-confidence-large real';
+        if (confidenceValue) confidenceValue.style.color = 'var(--success)';
+    } else {
+        // Fallback: default to real if unclear
+        resultBadge.textContent = 'REAL';
+        resultBadge.className = 'result-badge real-badge';
+        confidenceFill.className = 'confidence-fill real';
+        resultConfidence.className = 'result-confidence-large real';
+        if (confidenceValue) confidenceValue.style.color = 'var(--success)';
     }
 
-    resultConfidence.textContent = confidence + '%';
-    confidenceValue.textContent = confidence + '%';
-    confidenceFill.style.width = confidence + '%';
+    // Format prediction string for display (capitalize first letter of each word)
+    const formattedPrediction = data.prediction
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+        .join(' ');
 
+    // Display confidence (use backend value exactly, format to 2 decimals if needed)
+    const formattedConfidence = confidence.toFixed(2);
+    resultConfidence.textContent = formattedConfidence + '%';
+    confidenceValue.textContent = formattedConfidence + '%';
+    confidenceFill.style.width = formattedConfidence + '%';
+
+    // Update result details with formatted prediction
     resultDetails.textContent =
-        `Model Prediction: ${data.prediction}
-Confidence: ${confidence}%`;
+        `Model Prediction: ${formattedPrediction}\nConfidence: ${formattedConfidence}%`;
 }
 
             
