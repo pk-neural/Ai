@@ -136,3 +136,103 @@ This project is open source and available for educational and research purposes.
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+<<<<<<< HEAD
+=======
+Optional label file: backend/models/fastfood_labels.txt
+
+One label per line
+
+
+Supports both:
+
+Single-logit (sigmoid) models
+
+Multi-class (softmax) models
+
+
+Debug information (preprocessing stats) may be returned in the API response for troubleshooting.
+
+
+
+---
+
+🧠 Model Preprocessing
+
+All models currently use:
+
+Image resize: 224 × 224
+
+RGB format
+
+Normalization: 0–1 range
+
+Channel order: NCHW
+
+
+If a model expects NHWC, the backend attempts to auto-detect and transpose inputs.
+
+
+---
+
+🛠️ Troubleshooting
+
+Model input shape errors:
+Ensure the ONNX model input size matches preprocessing in backend/main.py.
+
+Dependency issues:
+Verify the correct virtualenv is activated.
+
+Unexpected predictions:
+Check model output shape (1 logit vs multi-class) and adjust inference logic.
+
+
+
+---
+
+🔮 Future Improvements
+
+Video-based deepfake detection
+
+Cloud deployment (Render / Railway)
+
+Authentication and user history
+
+Better UI visualizations for confidence scores
+
+
+
+ 
+
+ ////////////////////////////////////////////////////////////////////////////////
+ # Go to project root folder
+cd ~/Downloads/AI
+
+# Activate virtual environment
+source .venv/bin/activate
+
+# Install all required packages (run once or after changes)
+pip install fastapi uvicorn onnxruntime numpy opencv-python pillow python-multipart
+
+# Save installed packages for future use
+pip freeze > requirements.txt
+
+# Go to backend folder
+cd backend
+
+# Run FastAPI backend server (auto-reload on changes)
+uvicorn main:app --reload
+
+# ================================
+# OPEN A NEW TERMINAL AFTER THIS
+# ================================
+
+# Go to frontend folder
+cd ~/Downloads/AI/frontend
+
+# Run frontend server for HTML/CSS/JS
+python -m http.server 5500
+
+# Open in browser:
+# Backend → http://127.0.0.1:8000/docs
+# Frontend → http://localhost:5500
+>>>>>>> 0f28073 (Clean repository and update gitignore)
